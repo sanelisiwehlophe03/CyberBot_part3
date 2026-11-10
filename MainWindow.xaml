@@ -1,0 +1,371 @@
+<Window x:Class="CyberBot.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CyberBot - Cybersecurity Awareness Chatbot"
+        Height="840" Width="1200" MinHeight="700" MinWidth="980"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BgBrush}"
+        FontFamily="Segoe UI">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ============ HEADER: ASCII logo + title + status ============ -->
+        <Border Grid.Row="0" Margin="0,0,0,12" Padding="20,10"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1" CornerRadius="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="AsciiLogo" Grid.Column="0"
+                           FontFamily="Consolas" FontSize="12"
+                           Foreground="{StaticResource RedBrush}"
+                           VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="1" Margin="28,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="CYBERSECURITY AWARENESS CHATBOT"
+                               FontSize="22" FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}"/>
+                    <Border Height="2" Margin="0,8,0,8" HorizontalAlignment="Left" Width="340"
+                            Background="{StaticResource AccentBrush}"/>
+                    <TextBlock Text="Chat, manage cybersecurity tasks, take the quiz and review your activity."
+                               Foreground="{StaticResource MutedBrush}" FontSize="13"/>
+                    <TextBlock x:Name="StatusText" Margin="0,6,0,0" FontSize="12"
+                               Foreground="{StaticResource GreenBrush}"/>
+                    <TextBlock x:Name="DbStatusText" Margin="0,2,0,0" FontSize="12"
+                               Text="Database: connecting..." Foreground="{StaticResource MutedBrush}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ============ NAVIGATION ============ -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+            <Button x:Name="NavChat" Content="Chat" Tag="Chat" Style="{StaticResource AccentButton}"
+                    Margin="0,0,8,0" Click="Nav_Click"/>
+            <Button x:Name="NavTasks" Content="Tasks" Tag="Tasks" Style="{StaticResource PillButton}"
+                    Padding="22,9" Margin="0,0,8,0" Click="Nav_Click"/>
+            <Button x:Name="NavQuiz" Content="Quiz" Tag="Quiz" Style="{StaticResource PillButton}"
+                    Padding="22,9" Margin="0,0,8,0" Click="Nav_Click"/>
+            <Button x:Name="NavLog" Content="Activity Log" Tag="Log" Style="{StaticResource PillButton}"
+                    Padding="22,9" Margin="0,0,8,0" Click="Nav_Click"/>
+        </StackPanel>
+
+        <!-- ============ MAIN AREA: views + side panel ============ -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="260"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- All four views share the same cell; only one is visible at a time -->
+            <Grid Grid.Column="0">
+
+                <!-- ===== CHAT VIEW ===== -->
+                <Border x:Name="ChatView" Margin="0,0,12,0"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1" CornerRadius="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <ScrollViewer x:Name="ChatScroll" Grid.Row="0"
+                                      VerticalScrollBarVisibility="Auto" Padding="4">
+                            <StackPanel x:Name="ChatPanel" Margin="14,14,14,4"/>
+                        </ScrollViewer>
+
+                        <TextBlock x:Name="TypingText" Grid.Row="1" Margin="18,0,0,10"
+                                   Text="CyberBot is typing..." FontStyle="Italic" FontSize="12"
+                                   Foreground="{StaticResource MutedBrush}" Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+
+                <!-- ===== TASKS VIEW ===== -->
+                <Border x:Name="TasksView" Margin="0,0,12,0" Padding="18" Visibility="Collapsed"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1" CornerRadius="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="TASK ASSISTANT" Style="{StaticResource SectionLabel}"/>
+
+                        <!-- New task form -->
+                        <Border Grid.Row="1" Margin="0,0,0,12" Padding="14"
+                                Background="{StaticResource PanelLightBrush}" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Title" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,3"/>
+                                <TextBox x:Name="TaskTitleBox" Style="{StaticResource ChatInputStyle}"
+                                         Background="{StaticResource BgBrush}" Padding="12,6" MaxLength="100" Margin="0,0,0,8"/>
+
+                                <TextBlock Text="Description (optional - generated automatically if left blank)"
+                                           FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,3"/>
+                                <TextBox x:Name="TaskDescBox" Style="{StaticResource ChatInputStyle}"
+                                         Background="{StaticResource BgBrush}" Padding="12,6" MaxLength="300" Margin="0,0,0,8"/>
+
+                                <TextBlock Text="Reminder (optional)" FontSize="11"
+                                           Foreground="{StaticResource MutedBrush}" Margin="0,0,0,3"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <DatePicker x:Name="ReminderDatePicker" Width="160" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="ReminderTimeBox" Text="09:00" Width="80" Margin="10,0,0,0"
+                                             Style="{StaticResource ChatInputStyle}" Background="{StaticResource BgBrush}"
+                                             Padding="12,6" MaxLength="5"/>
+                                    <TextBlock Text="(HH:mm)" Foreground="{StaticResource MutedBrush}"
+                                               VerticalAlignment="Center" Margin="8,0,20,0"/>
+                                    <Button x:Name="AddTaskButton" Content="Add task"
+                                            Style="{StaticResource AccentButton}" Click="AddTaskButton_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Task list -->
+                        <ListBox x:Name="TaskList" Grid.Row="2" Background="Transparent" BorderThickness="0"
+                                 HorizontalContentAlignment="Stretch"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ItemContainerStyle="{StaticResource PlainListBoxItem}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="Card" Margin="0,0,0,6" Padding="14,10" CornerRadius="8"
+                                            Background="{StaticResource PanelLightBrush}"
+                                            BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding StatusIcon}" FontSize="22" Margin="0,0,14,0"
+                                                       Foreground="{StaticResource GreenBrush}" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding HeadingText}" FontSize="15" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Description}" FontSize="13" Margin="0,2,0,2"
+                                                           Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding ReminderDisplay}" FontSize="12"
+                                                           Foreground="{StaticResource AccentBrush}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                            <Setter TargetName="Card" Property="Opacity" Value="0.55"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Messages + actions -->
+                        <StackPanel Grid.Row="3" Margin="0,10,0,0">
+                            <TextBlock x:Name="TaskMessage" Margin="0,0,0,8" FontSize="12" TextWrapping="Wrap"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       Text="Select a task to complete it, delete it or give it a reminder."/>
+                            <WrapPanel>
+                                <Button Content="Mark completed" Style="{StaticResource PillButton}" Margin="0,0,8,0"
+                                        Click="CompleteTaskButton_Click"/>
+                                <Button Content="Delete" Style="{StaticResource PillButton}" Margin="0,0,8,0"
+                                        BorderBrush="{StaticResource RedBrush}" Click="DeleteTaskButton_Click"/>
+                                <Button Content="Set reminder for selected" Style="{StaticResource PillButton}" Margin="0,0,8,0"
+                                        Click="SetReminderButton_Click"/>
+                                <Button Content="Refresh" Style="{StaticResource PillButton}" Click="RefreshTasksButton_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ===== QUIZ VIEW ===== -->
+                <Border x:Name="QuizView" Margin="0,0,12,0" Padding="24" Visibility="Collapsed"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1" CornerRadius="10">
+                    <Grid>
+
+                        <!-- Start screen -->
+                        <StackPanel x:Name="QuizStartPanel" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="480">
+                            <TextBlock Text="CYBERSECURITY QUIZ" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                            <TextBlock x:Name="QuizIntroText" Margin="0,14,0,20" TextWrapping="Wrap" TextAlignment="Center"
+                                       FontSize="14" Foreground="{StaticResource MutedBrush}"/>
+                            <Button x:Name="StartQuizButton" Content="Start quiz" Style="{StaticResource AccentButton}"
+                                    HorizontalAlignment="Center" Click="StartQuizButton_Click"/>
+                        </StackPanel>
+
+                        <!-- Question screen -->
+                        <Grid x:Name="QuizPlayPanel" Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="0,0,0,16">
+                                <TextBlock x:Name="QuizProgressText" FontWeight="Bold"
+                                           Foreground="{StaticResource AccentBrush}"/>
+                                <TextBlock x:Name="QuizScoreText" HorizontalAlignment="Right" FontWeight="Bold"
+                                           Foreground="{StaticResource GreenBrush}"/>
+                            </Grid>
+
+                            <TextBlock x:Name="QuizQuestionText" Grid.Row="1" FontSize="19" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" Margin="0,0,0,18" Foreground="{StaticResource TextBrush}"/>
+
+                            <StackPanel Grid.Row="2">
+                                <Button x:Name="OptionA" Tag="0" Style="{StaticResource OptionButton}" Click="QuizOption_Click"/>
+                                <Button x:Name="OptionB" Tag="1" Style="{StaticResource OptionButton}" Click="QuizOption_Click"/>
+                                <Button x:Name="OptionC" Tag="2" Style="{StaticResource OptionButton}" Click="QuizOption_Click"/>
+                                <Button x:Name="OptionD" Tag="3" Style="{StaticResource OptionButton}" Click="QuizOption_Click"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="3" Margin="0,10,0,0">
+                                <TextBlock x:Name="QuizFeedbackText" FontSize="14" TextWrapping="Wrap" Margin="0,0,0,12"
+                                           Foreground="{StaticResource TextBrush}"/>
+                                <Button x:Name="NextQuestionButton" Style="{StaticResource AccentButton}"
+                                        HorizontalAlignment="Left" Visibility="Collapsed" Click="NextQuestionButton_Click"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Result screen -->
+                        <StackPanel x:Name="QuizResultPanel" Visibility="Collapsed" VerticalAlignment="Center"
+                                    HorizontalAlignment="Center" MaxWidth="480">
+                            <TextBlock Text="QUIZ COMPLETE" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                            <TextBlock x:Name="QuizFinalScoreText" FontSize="42" FontWeight="Bold" Margin="0,12,0,8"
+                                       HorizontalAlignment="Center" Foreground="{StaticResource GreenBrush}"/>
+                            <TextBlock x:Name="QuizFinalMessageText" FontSize="15" TextWrapping="Wrap" TextAlignment="Center"
+                                       Margin="0,0,0,20" Foreground="{StaticResource TextBrush}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="Play again" Style="{StaticResource AccentButton}" Margin="0,0,8,0"
+                                        Click="StartQuizButton_Click"/>
+                                <Button Content="Back to chat" Style="{StaticResource PillButton}" Tag="Chat" Click="Nav_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ===== ACTIVITY LOG VIEW ===== -->
+                <Border x:Name="LogView" Margin="0,0,12,0" Padding="18" Visibility="Collapsed"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1" CornerRadius="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="ACTIVITY LOG" Style="{StaticResource SectionLabel}"/>
+                        <TextBlock x:Name="LogSummaryText" Grid.Row="1" Margin="0,0,0,10" FontSize="12"
+                                   Foreground="{StaticResource MutedBrush}"/>
+
+                        <ListBox x:Name="LogList" Grid.Row="2" Background="Transparent" BorderThickness="0"
+                                 HorizontalContentAlignment="Stretch"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ItemContainerStyle="{StaticResource PlainListBoxItem}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,5" Padding="12,8" CornerRadius="6"
+                                            Background="{StaticResource PanelLightBrush}">
+                                        <TextBlock Text="{Binding Display}" FontSize="13" TextWrapping="Wrap"
+                                                   Foreground="{StaticResource TextBrush}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button x:Name="ShowMoreLogButton" Content="Show 10 more" Style="{StaticResource PillButton}"
+                                    Margin="0,0,8,0" Click="ShowMoreLogButton_Click"/>
+                            <Button Content="Show latest 10 only" Style="{StaticResource PillButton}"
+                                    Click="ShowLessLogButton_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Side panel: topics + memory -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource PanelBrush}"
+                    BorderBrush="{StaticResource BorderLineBrush}" BorderThickness="1" CornerRadius="10">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="16">
+
+                        <TextBlock Text="TOPICS" Style="{StaticResource SectionLabel}"/>
+                        <StackPanel x:Name="TopicList" IsEnabled="False"/>
+
+                        <Border Height="1" Margin="0,10,0,14" Background="{StaticResource BorderLineBrush}"/>
+
+                        <TextBlock Text="WHAT I REMEMBER" Style="{StaticResource SectionLabel}"/>
+                        <Border Background="{StaticResource PanelLightBrush}" CornerRadius="8" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="Name" FontSize="11" Foreground="{StaticResource MutedBrush}"/>
+                                <TextBlock x:Name="NameText" Text="-" Margin="0,0,0,8"
+                                           Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
+
+                                <TextBlock Text="Favourite topic" FontSize="11" Foreground="{StaticResource MutedBrush}"/>
+                                <TextBlock x:Name="InterestText" Text="Not set yet" Margin="0,0,0,8"
+                                           Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
+
+                                <TextBlock Text="Discussed so far" FontSize="11" Foreground="{StaticResource MutedBrush}"/>
+                                <TextBlock x:Name="TopicsText" Text="None yet" Margin="0,0,0,8"
+                                           Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
+
+                                <TextBlock Text="Your mood" FontSize="11" Foreground="{StaticResource MutedBrush}"/>
+                                <TextBlock x:Name="MoodText" Text="Neutral"
+                                           Foreground="{StaticResource TextBrush}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- ============ INPUT AREA (chat view only) ============ -->
+        <StackPanel x:Name="InputArea" Grid.Row="3" Margin="0,12,0,0">
+
+            <WrapPanel x:Name="QuickPanel" Margin="0,0,0,10" IsEnabled="False">
+                <Button Content="Another tip" Tag="another tip" Style="{StaticResource PillButton}"
+                        Margin="0,0,8,6" Click="QuickAction_Click"/>
+                <Button Content="Tell me more" Tag="tell me more" Style="{StaticResource PillButton}"
+                        Margin="0,0,8,6" Click="QuickAction_Click"/>
+                <Button Content="I don't understand" Tag="i don't understand" Style="{StaticResource PillButton}"
+                        Margin="0,0,8,6" Click="QuickAction_Click"/>
+                <Button Content="My tasks" Tag="show my tasks" Style="{StaticResource PillButton}"
+                        Margin="0,0,8,6" Click="QuickAction_Click"/>
+                <Button Content="Start the quiz" Tag="start the quiz" Style="{StaticResource PillButton}"
+                        Margin="0,0,8,6" Click="QuickAction_Click"/>
+                <Button Content="What have you done for me?" Tag="what have you done for me" Style="{StaticResource PillButton}"
+                        Margin="0,0,8,6" Click="QuickAction_Click"/>
+                <Button Content="What do you remember?" Tag="what do you remember about me" Style="{StaticResource PillButton}"
+                        Margin="0,0,8,6" Click="QuickAction_Click"/>
+                <Button Content="Help" Tag="help" Style="{StaticResource PillButton}"
+                        Margin="0,0,8,6" Click="QuickAction_Click"/>
+            </WrapPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="InputBox" Grid.Column="0" Style="{StaticResource ChatInputStyle}"
+                         MaxLength="300" KeyDown="InputBox_KeyDown" Margin="0,0,10,0"/>
+
+                <Button x:Name="SendButton" Grid.Column="1" Content="Send"
+                        Style="{StaticResource AccentButton}" Click="SendButton_Click"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>
