@@ -81,8 +81,8 @@ namespace CyberBot
 
             if (!databaseReady)
             {
-                await AddBotMessageAsync("Heads up: I couldn't connect to the MySQL task database, so the task features are switched off. " +
-                                         "Check appsettings.json and that MySQL is running, then restart me. Everything else still works.");
+                await AddBotMessageAsync("Heads up: I couldn't connect to the MySQL task database, so the task features are switched off.\n" +
+                         "MySQL said: " + _repo.LastError);
             }
 
             await AddBotMessageAsync("First things first - what's your name?");
